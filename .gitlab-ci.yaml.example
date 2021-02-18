@@ -1,0 +1,19 @@
+image: ubuntu:20.04
+
+stages:
+  - deploy
+
+
+default:
+  before_script:
+    - ./before-script
+
+
+dev-deploy:
+  stage: deploy
+  script:
+    - ./pre-deploy-tests
+    - ./deploy
+    - ./post-deploy-tests
+  only:
+    - dev
