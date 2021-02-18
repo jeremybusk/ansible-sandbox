@@ -1,0 +1,10 @@
+---
+- hosts: testhosts
+  become: yes
+  tasks:
+  - name: Demo fail of install packages
+    apt:
+      name:
+      - chrony 
+      state: latest
+      cache_valid_time: 3600

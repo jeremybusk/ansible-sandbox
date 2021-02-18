@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+# ansible all -m ping
+ansible host1 -m ping

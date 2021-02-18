@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+ssh host1 "apt remove -y chrony"
+ansible-playbook playbooks/basepkgs.yml
+ansible-playbook playbooks/basepkgs.yml
+ansible-playbook playbooks/demofail.yml
+ansible-playbook playbooks/democmd.yml
+
+# ssh host1 "apt install -y chrony"
+# echo $?

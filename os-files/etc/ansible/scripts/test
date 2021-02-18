@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Simple application of a playbook after removing pkg
+set -e
+pkg=chrony
+pbdir=/etc/ansible/playbooks
+ssh host1 "apt remove -y $pkg"
+ansible-playbook "$pbdir/basepkgs.yml"
+ansible-playbook "$pbdir/democmd.yml"
+ssh host1 "dpkg --list | grep ${pkg} || (echo \"ERROR: Missing $pkg pkg!\"; exit 1)"
+ansible-playbook --extra-vars "ip_var=127.0.0.1" "$pbdir/nmapscan.yml"
+
+# NOTES
+# echo $?
+# r=$(dpkg --list | grep $pkg | tr -d "[:space:]")
+# echo "r: $r"
+# if [[ -z "$r" ]]; then
+#   echo "ERROR: Missing $pkg pkg!";
+#   exit 1;
+# fi

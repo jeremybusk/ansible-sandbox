@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -e
+shopt -s expand_aliases
+echo "Running ansible file deploy/refresh."
+# ssh_user="svc-cicd"
+ssh_user="root"
+ssh_host="txd1-lxd.extendhealth.com"
+ssh_port=20002
+ssh_opts="-o ConnectionAttempts=10 \
+  -o StrictHostKeyChecking=no \
+  -o UserKnownHostsFile=/dev/null"
+# -o UserKnownHostsFile=.ssh/known_hosts \
+ssh_cmd="ssh -l ${ssh_user} -p ${ssh_port} ${ssh_opts}"
+alias ssh="${ssh_cmd}"
+alias scp="scp ${ssh_opts}"
+
+eval $(ssh-agent -s)
+echo "$SSH_SECRET_KEY" | tr -d '\r' | ssh-add - > /dev/null
+
+alias rsync="rsync -avz --chmod=D0755,F0644 --rsync-path=\"sudo rsync\" -e \"${ssh_cmd}\""
+rsync ./os-files/* "$ssh_host":/
+ecode=$?
+if [[ ${ecode} -lt 0 ]]; then
+  echo "ERROR: Failure to rsync os files!"
+  exit 1
+fi
+ssh "$ssh_host" "chmod 0700 /apps/post-deploy-tests"
+echo $?
+ssh "$ssh_host" "/apps/post-deploy-tests"
+echo $?
+ssh "$ssh_host" "bash /etc/ansible/scripts/test"
+echo $?
+
+
+# NOTES
+
+# rsync_exclude="--exclude={*ignoremethis,moreignore}"
+# rsync_perms="--chown=${user}:${user}"
+# alias rsync="rsync -rzv --rsync-path=\"sudo rsync\" -e \"${ssh_cmd}\""
+
+# if [[ $(git diff HEAD^ HEAD os-files/etc/nftables.conf) ]]; then
+#   echo "nftables updated"
+#   ssh "${ssh_host}" "set -ex; sudo systemctl restart nftables"
+# fi
+
+# Fix perms
+# find /home/user -type f -exec chmod 0664 {} \;
+# find /home/user -type d -exec chmod 0775 {} \;
+
+# echo "$SSH_SECRET_KEY" | base64 -d | tr -d '\r' | ssh-add - > /dev/null
+# printf -- $(echo b25lXG50d29cbgo= | base64 -d)
+# ssh-add echo <(echo "$SSH_SECRET_KEY")

@@ -1,0 +1,15 @@
+---
+- hosts: testhosts 
+  become: yes
+  tasks:
+  - name: Install packages
+    apt:
+      name:
+      - nmap
+      state: latest
+      cache_valid_time: 3600
+  - name: Scan host using nmap
+    shell: nmap "{{ ip_var }}"
+    register: out
+
+  - debug: var=out.stdout_lines

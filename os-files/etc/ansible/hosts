@@ -1,0 +1,13 @@
+all:
+  hosts:
+    host2
+    host3
+  children:
+    webservers:
+      hosts:
+        foo:
+        bar:
+    testhosts:
+      hosts:
+        host1:
+    
